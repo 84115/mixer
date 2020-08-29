@@ -1,1 +1,32 @@
-//
+// Fonts
+// @import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url(https://fonts.googleapis.com/css?family=Walter+Turncoat);
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+
+
+// Custom
+body {
+  color: #E8E8E8;
+  font-family: "Walter Turncoat", cursive;
+  background-color: #222222;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+a { color: #ff0; }
+
+.card { background: none; }
+
+select.custom-select {
+  background: #212121 !important;
+  border-color: #6cb2eb !important;
+  color: #6cb2eb !important;
+  text-align: center !important;
+}

@@ -12,6 +12,7 @@ class EncryptCookies extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        'XDEBUG_SESSION',
+        'VSCODE',
     ];
 }

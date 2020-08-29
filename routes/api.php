@@ -14,6 +14,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::prefix('api')->group(function () {
+    Route::get('user', function () {
+        return new App\Http\Resources\User(App\User::paginate());
+    });
+    
+    Route::get('user/{id}', function ($id) {
+        return new App\Http\Resources\User(App\User::find($id));
+    });
+    
+    Route::get('cocktail', function () {
+        return new App\Http\Resources\Cocktail(App\Cocktail::paginate());
+    });
+    
+    Route::get('cocktail/{id}', function ($id) {
+        return new App\Http\Resources\Cocktail(App\Cocktail::find($id));
+    });
 });

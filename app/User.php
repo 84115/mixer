@@ -36,4 +36,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * The cocktails that belong to the user.
+     */
+    public function cocktails()
+    {
+        return $this->hasMany('App\Cocktail');
+    }
 }

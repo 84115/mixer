@@ -13,6 +13,44 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome');
+
+Route::resource('users', 'UsersController');
+Route::get('users', 'UsersController@index');
+Route::get('users/{id}', 'UsersController@show');
+
+Route::resource('ingredients', 'IngredientsController');
+Route::get('ingredients-types', 'IngredientsController@types');
+Route::get('ingredients-type/{name}', 'IngredientsController@type');
+
+Route::resource('cocktails', 'CocktailsController');
+Route::get('cocktails/{id}', 'CocktailsController@show');
+Route::post('cocktails/store', 'CocktailsController@store');
+
+Route::get('cocktails-categories', 'CocktailsController@categories');
+Route::get('cocktails-category/{name}', 'CocktailsController@category');
+
+Route::get('cocktails-ibas', 'CocktailsController@ibas');
+Route::get('cocktails-iba/{name}', 'CocktailsController@iba');
+
+Route::resource('mix', 'MixController');
+
+/*Route::get('wsdl', function() {
+    $params = [];
+    $url = "http://wsf.cdyne.com/WeatherWS/Weather.asmx?WSDL";
+
+    try {
+        $client = new SoapClient($url, $params);
+        // dd($client->__getTypes());
+        dd($client->GetCityForecastByZIP([
+            'ZIP' => '94203',
+        ]));
+    } catch (SoapFault $fault) {
+        echo $fault;
+    }
+});*/
+
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
