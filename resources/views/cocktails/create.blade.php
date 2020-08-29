@@ -3,7 +3,8 @@
 @section('title', "Cocktails: Create")
 
 @section('content')
-    <form method="POST" action="/cocktails/store">
+    {{-- <form method="POST" action="/cocktails/store"> --}}
+    <form method="POST" action="{{ route('cocktails.store') }}" enctype="multipart/form-data">
         @csrf
         @method('POST')
 
@@ -85,6 +86,25 @@
                                     <input type="text" class="form-control" id="measure{{ $n }}" name="measure{{ $n }}" aria-describedby="measure{{ $n }}-help">
                                 </div>
                             @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row">
+                <div class="col-sm">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="image">Image</label>
+                                <input type="file" class="form-control" id="image" name="image" aria-describedby="image-help" placeholder="Enter cocktail image">
+                                <small id="image-help" class="form-text text-muted">Upload an image if you want but it would be preferable.</small>
+                                @if($errors->first('image'))
+                                    <div class="alert alert-warning">{{ $errors->first('image') }}</div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

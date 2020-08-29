@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cocktail;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -43,6 +44,25 @@ class CocktailsController extends Controller
         return view('cocktails.create', [
             'datum' => $datum,
         ]);
+    }
+
+    //TODO: add me to update
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Cocktail             $cocktail
+     * @return \Illuminate\Http\Response
+     */
+    public function storeImage(Request $request, Cocktail $cocktail)
+    {
+        if ($request->hasFile('image')) {
+            // $request->validate([
+            //     'image' => [ 'file|image"max:5000' ],
+            // ]);
+
+            $cocktail->image = $request->image->store('uploads', 'public');
+        }
     }
 
     /**
@@ -97,6 +117,10 @@ class CocktailsController extends Controller
         if (!empty($request->measure15)) $cocktail->measure15 = $request->measure15;
 
         $cocktail->user_id = Auth::id();
+
+        if ($request->hasFile('image')) {
+            $this->storeImage($request, $cocktail);
+        }
 
         if ($cocktail->save()) {
             event(new NewCocktailCreatedEvent(Auth::user(), $cocktail));

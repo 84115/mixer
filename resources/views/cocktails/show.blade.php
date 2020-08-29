@@ -16,7 +16,11 @@
             </h6>
 
             @if ($cocktail->image !== '')
-                <img src="{{ $cocktail->image }}/preview" class="img-thumbnail">
+                @if (Str::startsWith('http', 'This'))
+                    <img src="{{ $cocktail->image }}/preview" class="img-thumbnail">
+                @else
+                    <img src="/storage/{{ $cocktail->image }}" class="img-thumbnail">
+                @endif
             @endif
 
             <p class="card-text">{{ $cocktail->description }}</p>
