@@ -3,7 +3,6 @@
 @section('title', "Cocktails: Create")
 
 @section('content')
-    {{-- <form method="POST" action="/cocktails/store"> --}}
     <form method="POST" action="{{ route('cocktails.store') }}" enctype="multipart/form-data">
         @csrf
         @method('POST')

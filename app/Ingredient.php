@@ -19,4 +19,22 @@ class Ingredient extends Model
      * @var bool
      */
     public $timestamps = true;
+
+    /**
+     * The users that belong to the role.
+     */
+    public function cocktailsPivot()
+    {
+        return $this->belongsToMany('App\Cocktail');
+    }
+
+    /**
+     * ...
+     *
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        return urlencode($this->name);
+    }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Ingredient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class IngredientsController extends Controller
 {
@@ -61,7 +62,7 @@ class IngredientsController extends Controller
      */
     public function create()
     {
-        //
+        return view('ingredients.create');
     }
 
     /**
@@ -72,7 +73,20 @@ class IngredientsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $ingredient = new Ingredient;
+
+        $ingredient->name = $request->name;
+        $ingredient->description = $request->description;
+        $ingredient->type = $request->type ?? "";
+        $ingredient->alcoholic = $request->alcoholic ?? "";
+        $ingredient->abv = $request->abv ?? "";
+        $ingredient->save();
+
+        if ($ingredient) {
+            return redirect('ingredients/' . urlencode($ingredient->name));
+        } else {
+            return "ERROR!";
+        }
     }
 
     /**
@@ -85,8 +99,18 @@ class IngredientsController extends Controller
     {
         $ingredient = Ingredient::where('name', urldecode($id))->first();
 
+        if (empty($ingredient)) {
+            abort(404, "Ingredient: $ingredient not found.");
+        }
+
+        $related = $ingredient->cocktailsPivot->filter(function ($value, $key) use ($ingredient) {
+            return $value->id !== $ingredient->id;
+        })->sortBy('name');
+
+        // dd($related);
         return view('ingredients.show', [
             'ingredient' => $ingredient,
+            'related' => $related,
         ]);
     }
 
@@ -121,6 +145,25 @@ class IngredientsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Ingredient::destroy($id);
+
+        return redirect('/users/'.Auth::id());
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function pivot($id)
+    {
+        $ingredient = Ingredient::findOrFail($id);
+
+        echo "<ul>";
+        foreach ($ingredient->cocktailsPivot as $cocktail) {
+            echo "<li><a href=\"/cocktails/pivot/{$cocktail->id}\">{$cocktail->name}</a></li>";
+        }
+        echo "</ul>";
     }
 }

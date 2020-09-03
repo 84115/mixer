@@ -8,6 +8,37 @@
         <title>{{ __('app.name') }} - @yield('title')</title>
     </head>
     <body>
+            <div class="container">
+                <ul class="nav nav-pills justify-content-center" style="position: absolute; top: 0; right: 0;">
+                    @guest
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                        </li>
+                        @if (Route::has('register'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                            </li>
+                        @endif
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('home') }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ Auth::user()->name }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="#" href="{{ route('logout') }}"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+                        </li>
+
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                    @endguest
+                </ul>
+            </div>
+
         <div class="m-2">
             <h1 class="pt-4 text-center">@yield('title')</h1>
             <h2 class="text-center">{{ __('app.name') }}</h2>

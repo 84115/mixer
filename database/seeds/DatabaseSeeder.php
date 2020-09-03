@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             IngredientSeeder::class,
             CocktailSeeder::class,
+            CocktailIngredientPivotSeeder::class,
         ]);
     }
 }

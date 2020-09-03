@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Cocktail;
-use App\User;
-use Illuminate\Support\Facades\Auth;
+use App\Services\CocktailsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Events\NewCocktailCreatedEvent;
 
 class CocktailsController extends Controller
 {
+    private $service;
+
+    public function __construct(CocktailsService $service)
+    {
+        $this->service = new $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,25 +52,6 @@ class CocktailsController extends Controller
         ]);
     }
 
-    //TODO: add me to update
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Cocktail             $cocktail
-     * @return \Illuminate\Http\Response
-     */
-    public function storeImage(Request $request, Cocktail $cocktail)
-    {
-        if ($request->hasFile('image')) {
-            // $request->validate([
-            //     'image' => [ 'file|image"max:5000' ],
-            // ]);
-
-            $cocktail->image = $request->image->store('uploads', 'public');
-        }
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -73,62 +60,13 @@ class CocktailsController extends Controller
      */
     public function store(Request $request)
     {
-        $validation = $request->validate([
-            'name' => [ 'required' ],
-        ]);
+        $cocktail = $this->service->store($request);
 
-        $cocktail = new Cocktail;
-
-        $cocktail->name = $request->name;
-        $cocktail->category = $request->category;
-        $cocktail->glass = $request->glass;
-        $cocktail->instructions = $request->instructions;
-
-        if (!empty($request->ingredient1)) $cocktail->ingredient1 = $request->ingredient1;
-        if (!empty($request->ingredient2)) $cocktail->ingredient2 = $request->ingredient2;
-        if (!empty($request->ingredient3)) $cocktail->ingredient3 = $request->ingredient3;
-        if (!empty($request->ingredient4)) $cocktail->ingredient4 = $request->ingredient4;
-        if (!empty($request->ingredient5)) $cocktail->ingredient5 = $request->ingredient5;
-        if (!empty($request->ingredient6)) $cocktail->ingredient6 = $request->ingredient6;
-        if (!empty($request->ingredient7)) $cocktail->ingredient7 = $request->ingredient7;
-        if (!empty($request->ingredient8)) $cocktail->ingredient8 = $request->ingredient8;
-        if (!empty($request->ingredient9)) $cocktail->ingredient9 = $request->ingredient9;
-        if (!empty($request->ingredient10)) $cocktail->ingredient10 = $request->ingredient10;
-        if (!empty($request->ingredient11)) $cocktail->ingredient11 = $request->ingredient11;
-        if (!empty($request->ingredient12)) $cocktail->ingredient12 = $request->ingredient12;
-        if (!empty($request->ingredient13)) $cocktail->ingredient13 = $request->ingredient13;
-        if (!empty($request->ingredient14)) $cocktail->ingredient14 = $request->ingredient14;
-        if (!empty($request->ingredient15)) $cocktail->ingredient15 = $request->ingredient15;
-
-        if (!empty($request->measure1)) $cocktail->measure1 = $request->measure1;
-        if (!empty($request->measure2)) $cocktail->measure2 = $request->measure2;
-        if (!empty($request->measure3)) $cocktail->measure3 = $request->measure3;
-        if (!empty($request->measure4)) $cocktail->measure4 = $request->measure4;
-        if (!empty($request->measure5)) $cocktail->measure5 = $request->measure5;
-        if (!empty($request->measure6)) $cocktail->measure6 = $request->measure6;
-        if (!empty($request->measure7)) $cocktail->measure7 = $request->measure7;
-        if (!empty($request->measure8)) $cocktail->measure8 = $request->measure8;
-        if (!empty($request->measure9)) $cocktail->measure9 = $request->measure9;
-        if (!empty($request->measure10)) $cocktail->measure10 = $request->measure10;
-        if (!empty($request->measure11)) $cocktail->measure11 = $request->measure11;
-        if (!empty($request->measure12)) $cocktail->measure12 = $request->measure12;
-        if (!empty($request->measure13)) $cocktail->measure13 = $request->measure13;
-        if (!empty($request->measure14)) $cocktail->measure14 = $request->measure14;
-        if (!empty($request->measure15)) $cocktail->measure15 = $request->measure15;
-
-        $cocktail->user_id = Auth::id();
-
-        if ($request->hasFile('image')) {
-            $this->storeImage($request, $cocktail);
+        if (!$cocktail) {
+            abort(503, "Failed to save Cocktail: $cocktail.");
         }
 
-        if ($cocktail->save()) {
-            event(new NewCocktailCreatedEvent(Auth::user(), $cocktail));
-
-            return redirect('cocktails/' . urlencode($cocktail->name));
-        } else {
-            return "ERROR!";
-        }
+        return redirect('cocktails/' . urlencode($cocktail->name));
     }
 
     /**
@@ -139,8 +77,19 @@ class CocktailsController extends Controller
      */
     public function show($id)
     {
+        $cocktail = Cocktail::where('name', urldecode($id))->first();
+
+        if (empty($cocktail)) {
+            abort(404, "Cocktail: $cocktail not found.");
+        }
+
+        $related = $cocktail->ingredientsPivot[0]->cocktailsPivot->filter(function ($value, $key) use ($cocktail) {
+            return $value->id !== $cocktail->id;
+        })->slice(0, 10);
+
         return view('cocktails.show', [
-            'cocktail' => Cocktail::where('name', urldecode($id))->first(),
+            'cocktail' => $cocktail,
+            'related' => $related,
         ]);
     }
 
@@ -152,7 +101,18 @@ class CocktailsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $cocktail = Cocktail::where('name', urldecode($id))->first();
+
+        $datum = [
+            'category' => DB::table('cocktails')->pluck('category')->unique()->sort(),
+            'glass' => DB::table('cocktails')->pluck('glass')->unique()->sort(),
+            'ingredients' => collect(Cocktail::getIngredients()),
+        ];
+
+        return view('cocktails.edit', [
+            'cocktail' => $cocktail,
+            'datum' => $datum,
+        ]);
     }
 
     /**
@@ -164,7 +124,13 @@ class CocktailsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $cocktail = $this->service->update($request, $id);
+
+        if (empty($cocktail)) {
+            abort(404, "Cocktail: $cocktail could not be saved.");
+        }
+
+        return redirect("cocktails/{$cocktail->url}");
     }
 
     /**
@@ -175,10 +141,12 @@ class CocktailsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Cocktail::destroy($id);
+
+        return redirect('/users/'.Auth::id());
     }
 
-        /**
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -223,7 +191,7 @@ class CocktailsController extends Controller
 
         return view('collections.simple_list', [
             'name' => 'Cocktails: IBAS',
-            'link' => "cocktails-ibas",
+            'link' => "cocktails-iba",
             'items' => $ibas,
         ]);
     }
@@ -240,5 +208,22 @@ class CocktailsController extends Controller
         return view('cocktails.index', [
             'cocktails' => $cocktails,
         ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function pivot($id)
+    {
+        $cocktail = Cocktail::findOrFail($id);
+
+        echo "<ul>";
+        foreach ($cocktail->ingredientsPivot as $ingredient) {
+            echo "<li><a href=\"/ingredients/pivot/{$ingredient->id}\">{$ingredient->name}</a></li>";
+        }
+        echo "</ul>";
     }
 }

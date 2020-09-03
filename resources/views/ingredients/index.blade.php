@@ -4,7 +4,14 @@
 
 @section('content')
     <div class="card-columns">
-        <div class="card">
+        @auth
+            <div class="card bg-warning">
+                <div class="card-body">
+                    <a href="{{ url("ingredients/create") }}" class="btn btn-warning btn-lg">Create your own!</a>
+                </div>
+            </div>
+        @endauth
+        <div class="card border-warning">
             <div class="card-body">
                 <h5 class="card-title">Browse By</h5>
                 <a href="{{ url("ingredients-types") }}" class="btn btn-warning">Type</a>

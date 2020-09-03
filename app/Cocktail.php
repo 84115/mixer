@@ -22,7 +22,6 @@ class Cocktail extends Model
 
     public static function getIngredients()
     {
-        // $cocktails = \App\Cocktail::orderBy('name', 'asc')->get();
         $cocktails = self::orderBy('name', 'asc')->get();
 
         $filters = array_unique(
@@ -56,5 +55,20 @@ class Cocktail extends Model
     public function user()
     {
         return $this->belongsTo('App\User');
+    }
+
+    public function ingredientsPivot()
+    {
+        return $this->belongsToMany('App\Ingredient');
+    }
+
+    /**
+     * ...
+     *
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        return urlencode($this->name);
     }
 }

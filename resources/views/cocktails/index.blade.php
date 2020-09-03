@@ -46,18 +46,17 @@
     <div class="card-columns">
         @if(!isset($title))
             @auth
-                <div class="card">
+                <div class="card bg-warning">
                     <div class="card-body">
-                        <h5 class="card-title">Create your own!</h5>
-                        <a href="{{ url("cocktails/create") }}" class="btn btn-warning">...</a>
+                        <a href="{{ url("cocktails/create") }}" class="btn btn-warning btn-lg">Create your own!</a>
                     </div>
                 </div>
             @endauth
-            <div class="card">
+            <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title">Browse By</h5>
-                    <a href="{{ url("cocktails-ibas") }}" class="btn btn-warning">IBA</a>
-                    <a href="{{ url("cocktails-categories") }}" class="btn btn-warning">Category</a>
+                    <a href="{{ url("cocktails-ibas") }}" class="btn btn-warning btn-outline-dark">IBA</a>
+                    <a href="{{ url("cocktails-categories") }}" class="btn btn-warning btn-outline-dark">Category</a>
                 </div>
             </div>
         @endif
@@ -65,6 +64,7 @@
 
         @foreach ($cocktails as $cocktail)
           <div class="card">
+              {{-- <img src="{{ url("storage/{$cocktail->image}") }}" class="card-img-top" alt="{{ $cocktail->name }}"> --}}
               <div class="card-body">
                   <h5 class="card-title">{{ $cocktail->name }}</h5>
                   <h6 class="card-subtitle mb-2 text-muted">
@@ -79,7 +79,7 @@
                           </a>
                       </strong>
                   </h6>
-                  <a href="{{ url("cocktails").'/'.urlencode($cocktail->name) }}" class="btn btn-warning mt-2">View</a>
+                  <a href="{{ url("cocktails/".urlencode($cocktail->name)) }}" class="btn btn-warning mt-2">View</a>
               </div>
           </div>
         @endforeach

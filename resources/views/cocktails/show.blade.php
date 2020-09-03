@@ -16,10 +16,10 @@
             </h6>
 
             @if ($cocktail->image !== '')
-                @if (Str::startsWith('http', 'This'))
-                    <img src="{{ $cocktail->image }}/preview" class="img-thumbnail">
+                @if (strpos($cocktail->image, 'https://www.thecocktaildb.com') !== false)
+                    <img src="{{ "{$cocktail->image}/preview" }}" class="img-thumbnail">
                 @else
-                    <img src="/storage/{{ $cocktail->image }}" class="img-thumbnail">
+                    <img src="{{ url("/storage/$cocktail->image") }}" class="img-thumbnail">
                 @endif
             @endif
 
@@ -27,6 +27,10 @@
 
             @if ($cocktail->video !== '')
             <iframe src="{{ str_replace("watch?v=", "embed/", $cocktail->video) }}" class="img-thumbnail"></iframe>
+            @endif
+
+            @if (isset($cocktail->glass))
+                <p class="card-text">1 {{ $cocktail->glass }}</p>
             @endif
 
             <ul>
@@ -77,13 +81,45 @@
             @endif
             </ul>
 
+            @if (isset($cocktail->instructions))
+                <p class="card-text">{{ $cocktail->instructions }}</p>
+            @endif
+
             @if (isset($cocktail->user))
                 Author: <a href="{{ url("users/{$cocktail->user->id}") }}">{{ $cocktail->user->name }}</a>
                 <br>
                 <br>
+
+                @if (Auth::id() === $cocktail->user->id)
+                    <a href="{{ url("cocktails/{$cocktail->url}/edit") }}" class="btn btn-info">Edit</a>
+
+                    <form method="POST" action="{{ route('cocktails.destroy', [ 'cocktail' => $cocktail->id ]) }}" style="display:inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" value="Submit" class="btn btn-danger">Delete</button>
+                    </form>
+                @endif
             @endif
 
             <a href="{{ url("cocktails") }}" class="btn btn-warning">Back</a>
         </div>
     </div>
+
+    @if(null !== $related)
+        <br>
+        <br>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Simmilar Drinks</h5>
+                <ul>
+                    @foreach ($related as $related)
+                        <li>
+                            <a href="{{ $related->url }}">{{ $related->name }}</a> - ({{ str_replace([','], ', ', $related->ingredients) }})
+                        </li>                    
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
 @endsection
